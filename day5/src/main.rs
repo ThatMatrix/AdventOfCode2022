@@ -69,11 +69,22 @@ fn parse_moves(moves: &str) -> Vec<Movement>
 
 fn execute_movement(mut stacks:  Vec<Vec<char>>, movement: Movement) -> Vec<Vec<char>>
 {
+    let mut temp: Vec<char> = Vec::new();
     for _i in 0..movement.number
     {
         let e = stacks[(movement.start - 1) as usize].pop().expect("Not a char");
+        temp.push(e);
+        //PART1 START
+        //stacks[(movement.end - 1) as usize].push(e);
+        //PART1 END
+    }
+    //PART2 START
+    for _i in 0..movement.number
+    {
+        let e = temp.pop().expect("Not a char");
         stacks[(movement.end - 1) as usize].push(e);
     }
+    //PART2 END
 
     return stacks;
 }
