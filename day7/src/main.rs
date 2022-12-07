@@ -42,6 +42,24 @@ fn part1(dirs: &HashMap<String, u64>) ->u64 {
     return dirs.iter().filter_map(|(_, &size)| if size <= 100000 {Some(size)} else {None} ).sum();
 }
 
+fn part2(dirs: &HashMap<String, u64>) -> u64 {
+    let tt_space = 70000000;
+    let free_space = tt_space - dirs[""];
+    let need_to_free = 30000000 - free_space;
+
+    let mut sizes = dirs.iter().filter_map(|(_, &size)| {
+        if size >= need_to_free {
+            Some(size)
+        } else {
+            None
+        }
+    })
+    .collect::<Vec<_>>();
+
+    sizes.sort();
+    return sizes[0];
+}
+
 fn main()
 {
     let input_str = include_str!("input.txt");
@@ -49,4 +67,5 @@ fn main()
     let dirs = dir_parc(&input_str.lines().collect::<Vec<_>>());
 
     println!("Part1 solu is : {}", part1(&dirs));
+    println!("Part2 solution is: {}", part2(&dirs));
 }
