@@ -1,48 +1,63 @@
 struct File {
-  name: String,
-  size: i32,
+    name: String,
+    size: i32,
 }
 
-struct Folder {
-  sub_folders: Vec<Folder>,
-  files: Vec<File>,
-  name: String,
-  super_folder: Folder,
-}
-
-fn parse_command(root: Folder, line: &str)
-{
-  let parts = line.split(" ");
-  parts.next(); //we skip the $ at the beginning
-
-  let command = parts.next();
-
-  if command.eq("cd")
-  {
-    
-  }
-  else if command.eq("ls")
-  {
-
-  }
+struct Folder<'a> {
+    sub_folders: Vec<Box<Folder<'a>>>,
+    files: Vec<File>,
+    name: String,
+    super_folder: Option<Box<&'a Folder<'a>>>,
+    size : i32,
 }
 
 fn main() {
-  let input_str = include_str!("input_test.txt");
-  let lines = input_str.lines();
-  
-  let root = Folder(sub_folders= vec![], files=[], name="/");
-  line.next();
+    let input_str = include_str!("input_test.txt");
+    let mut lines = input_str.lines();
 
-  for line in lines.chars()
-  {
-    if line[0] == '$'
+    let mut root = Folder{sub_folders: vec![], files:vec![], name:"/".to_string(), size : 0, super_folder:None};
+    let save = root;
+    lines.next(); //skip the first cd /
+    let mut line = lines.next(); //parse the first command line
+
+    while line != None
     {
-      root = parse_command(root, line);
+        let mut parts = line.unwrap().split(" ");
+        parts.next(); //we skip the $ at the beginning
+
+        let command = parts.next();
+
+        if command.unwrap().eq("cd")
+        {
+            let path = parts.next();
+            for f in root.sub_folders
+            {
+                if f.name.eq(path.unwrap())
+                {
+                    root = *f;
+                }
+            }
+            root = *(*root.super_folder.unwrap());
+            line = lines.next();
+        }
+        else if command.unwrap().eq("ls")
+        {
+            line = lines.next();
+            while line != None && line.expect("NaN").chars().nth(0) != Some('$')
+            {
+                let mut parts = line.unwrap().split(" ");
+                let p1 = parts.next();
+                if p1.unwrap().eq("dir")
+                {
+                    root.sub_folders.push(Box::new(Folder{sub_folders:vec![], files:vec![], name:parts.next().unwrap().to_string(), size:0, super_folder:Some(Box::new(&root))}));
+                }
+                else
+                {
+                    root.files.push(File{size:p1.expect("p1 NaN").parse().unwrap(), name: parts.next().unwrap().to_string()});
+                }
+            }
+        }
     }
-    else
-    {
-      root = parse_file(root, line);
-    }
-  }
+
+    println!("arrived at the end {}", save.name);
 }
