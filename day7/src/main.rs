@@ -1,63 +1,52 @@
-struct File {
-    name: String,
-    size: i32,
-}
+use std::collections::HashMap;
 
-struct Folder<'a> {
-    sub_folders: Vec<Box<Folder<'a>>>,
-    files: Vec<File>,
-    name: String,
-    super_folder: Option<Box<&'a Folder<'a>>>,
-    size : i32,
-}
+fn dir_parc(commands: &[&str]) -> HashMap<String, u64>
+{
+    let mut current: Vec<String> = vec![];
 
-fn main() {
-    let input_str = include_str!("input_test.txt");
-    let mut lines = input_str.lines();
+    let mut dirs: HashMap<String, u64> = HashMap::new();
 
-    let mut root = Folder{sub_folders: vec![], files:vec![], name:"/".to_string(), size : 0, super_folder:None};
-    let save = root;
-    lines.next(); //skip the first cd /
-    let mut line = lines.next(); //parse the first command line
-
-    while line != None
-    {
-        let mut parts = line.unwrap().split(" ");
-        parts.next(); //we skip the $ at the beginning
-
-        let command = parts.next();
-
-        if command.unwrap().eq("cd")
-        {
-            let path = parts.next();
-            for f in root.sub_folders
-            {
-                if f.name.eq(path.unwrap())
-                {
-                    root = *f;
+    for &command in commands {
+        if command.starts_with("$ cd") {
+            match &command[5..] {
+                "/" => {
+                    current = vec!["".to_string()];
+                }
+                ".." => {
+                    current.pop();
+                }
+                other => {
+                    current.push(other.to_string());
                 }
             }
-            root = *(*root.super_folder.unwrap());
-            line = lines.next();
-        }
-        else if command.unwrap().eq("ls")
-        {
-            line = lines.next();
-            while line != None && line.expect("NaN").chars().nth(0) != Some('$')
+        } else if command.starts_with("$ ls") || command.starts_with("dir") {
+            continue;
+        } else {
+            let (size, _file_name) = command.split_once(' ').unwrap();
+            let size = size.parse::<u64>().unwrap();
+
+            for i in 0..current.len()
             {
-                let mut parts = line.unwrap().split(" ");
-                let p1 = parts.next();
-                if p1.unwrap().eq("dir")
-                {
-                    root.sub_folders.push(Box::new(Folder{sub_folders:vec![], files:vec![], name:parts.next().unwrap().to_string(), size:0, super_folder:Some(Box::new(&root))}));
-                }
-                else
-                {
-                    root.files.push(File{size:p1.expect("p1 NaN").parse().unwrap(), name: parts.next().unwrap().to_string()});
-                }
+                let key = current[0..=i].join("/").to_string();
+                //we compute the path
+
+                dirs.entry(key).and_modify(|a| *a += size).or_insert(size);
             }
         }
     }
 
-    println!("arrived at the end {}", save.name);
+    return dirs;
+}
+
+fn part1(dirs: &HashMap<String, u64>) ->u64 {
+    return dirs.iter().filter_map(|(_, &size)| if size <= 100000 {Some(size)} else {None} ).sum();
+}
+
+fn main()
+{
+    let input_str = include_str!("input.txt");
+
+    let dirs = dir_parc(&input_str.lines().collect::<Vec<_>>());
+
+    println!("Part1 solu is : {}", part1(&dirs));
 }
