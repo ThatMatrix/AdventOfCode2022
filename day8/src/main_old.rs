@@ -1,13 +1,13 @@
-fn parc_forest(input: &[&str]) -> Vec<Vec<i32>>
+fn parc_forest(input: &[&str]) -> Vec<Vec<u32>>
 {
-    let mut forest: Vec<Vec<i32>> = vec![];
-    let mut current:Vec<i32> = vec![];
+    let mut forest: Vec<Vec<u32>> = vec![];
+    let mut current:Vec<u32> = vec![];
     for &line in input
     {
         for c in line.chars()
         {
             //println!("char is: {}", c);
-            current.push(c.to_digit(10).unwrap() as i32);
+            current.push(c.to_digit(10).unwrap());
         }
         forest.push(current);
         current = vec![];
@@ -15,7 +15,7 @@ fn parc_forest(input: &[&str]) -> Vec<Vec<i32>>
     return forest;
 }
 
-fn sum_visible(forest: Vec<Vec<bool>>) -> i32
+fn sum_visible(forest: Vec<Vec<bool>>) -> u32
 {
     let mut sum = 0;
     for c in forest
@@ -30,17 +30,16 @@ fn sum_visible(forest: Vec<Vec<bool>>) -> i32
     return sum;
 }
 
-fn left_right_parc(forest: &Vec<Vec<i32>>, mut forest_bool: Vec<Vec<bool>>, begin: i32, end: i32, begin2: i32, end2: i32) -> Vec<Vec<bool>>
+fn left_right_parc(forest: &Vec<Vec<u32>>, mut forest_bool: Vec<Vec<bool>>, begin: i32, end: i32, begin2: i32, end2: i32) -> Vec<Vec<bool>>
 {
     let mut y = begin;
 
     while if begin < end {y < end} else {y > end}
     {
-        let mut max = -1;
+        let mut max = if begin < end {forest[y as usize][0]} else {forest[y as usize][forest[y as usize].len() - 1]};
         let mut x = begin2;
         while if begin2 < end2 {x < end2} else {x > end2}
         {
-            if max == 9 {break;}
             println!("x = {}", x);
             if forest_bool[y as usize][x as usize] {
                 max = if forest[y as usize][x as usize] > max {forest[y as usize][x as usize]} else {max};
@@ -59,18 +58,17 @@ fn left_right_parc(forest: &Vec<Vec<i32>>, mut forest_bool: Vec<Vec<bool>>, begi
     return forest_bool;
 }
 
-fn top_bottom_parc(forest: &Vec<Vec<i32>>, mut forest_bool: Vec<Vec<bool>>, begin: i32, end: i32, begin2: i32, end2: i32) -> Vec<Vec<bool>>
+fn top_bottom_parc(forest: &Vec<Vec<u32>>, mut forest_bool: Vec<Vec<bool>>, begin: i32, end: i32, begin2: i32, end2: i32) -> Vec<Vec<bool>>
 {
     let mut x = begin;
 
     while if begin < end {x < end} else {x > end}
     {
-        let mut max:i32 = -1;
+        let mut max = if begin < end {forest[0][x as usize]} else {forest[forest.len() - 1][x as usize]};
+
         let mut y = begin2;
         while if begin2 < end2 {y < end2} else {y > end2}
         {
-            println!("x = {}, y = {}, max = {}", x, y, max);
-            if max == 9 {break;}
             if forest_bool[y as usize][x as usize] {
                 max = if forest[y as usize][x as usize] > max {forest[y as usize][x as usize]} else {max};
                 y = if begin2 < end2 {y + 1} else {y - 1}; 
@@ -80,7 +78,6 @@ fn top_bottom_parc(forest: &Vec<Vec<i32>>, mut forest_bool: Vec<Vec<bool>>, begi
                 x as usize == forest[y as usize].len() - 1 || y as usize == forest.len() - 1;
             forest_bool[y as usize][x as usize] = forest_bool[y as usize][x as usize] ||
                                                     forest[y as usize][x as usize] > max;
-            max = if forest[y as usize][x as usize] > max {forest[y as usize][x as usize]} else {max};
             y = if begin2 < end2 {y + 1} else {y - 1};
         }
         x = if begin < end {x + 1} else {x - 1};
@@ -88,7 +85,7 @@ fn top_bottom_parc(forest: &Vec<Vec<i32>>, mut forest_bool: Vec<Vec<bool>>, begi
     return forest_bool;
 }
 
-fn part1(forest: Vec<Vec<i32>>) -> i32
+fn part1(forest: Vec<Vec<u32>>) -> u32
 {
     let mut forest_bool: Vec<Vec<bool>> = vec![vec![false; forest[0].len()]; forest.len()];
     let xlen: i32 = forest_bool[0].len() as i32;
@@ -101,7 +98,7 @@ fn part1(forest: Vec<Vec<i32>>) -> i32
 }
 
 fn main() {
-    let input_str = include_str!("input_test2.txt");
+    //let input_str = include_str!("input_test2.txt");
     let input_str = include_str!("input.txt");
     //println!("input is : {}", input_str);
 
