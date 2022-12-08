@@ -15,16 +15,17 @@ fn parc_forest(input: &[&str]) -> Vec<Vec<u32>>
     return forest;
 }
 
-fn print_debug<T: std::fmt::Display>(forest: Vec<Vec<T>>)
+fn sum_visible(forest: Vec<Vec<bool>>) -> u32
 {
+    let mut sum = 0;
     for c in forest
     {
         for n in c
         {
-            print!("{} ",n);
+            if n {sum += 1;}
         }
-        println!();
     }
+    return sum;
 }
 
 fn left_right_parc(forest: &Vec<Vec<u32>>, mut forest_bool: Vec<Vec<bool>>, begin: i32, end: i32, begin2: i32, end2: i32) -> Vec<Vec<bool>>
@@ -38,6 +39,7 @@ fn left_right_parc(forest: &Vec<Vec<u32>>, mut forest_bool: Vec<Vec<bool>>, begi
         while if begin2 < end2 {x < end2} else {x > end2}
         {
             if forest_bool[y as usize][x as usize] {
+                max = if forest[y as usize][x as usize] > max {forest[y as usize][x as usize]} else {max};
                 x = if begin2 < end2 {x + 1} else {x - 1}; 
                 continue;
             }
@@ -69,7 +71,6 @@ fn top_bottom_parc(forest: &Vec<Vec<u32>>, mut forest_bool: Vec<Vec<bool>>, begi
                 y = if begin2 < end2 {y + 1} else {y - 1}; 
                 continue;
             }
-            if x == 1 {println!("max = {}", max);}
             forest_bool[y as usize][x as usize] = y == 0 || x == 0 || 
                 x as usize == forest.len() - 1 || y as usize == forest[x as usize].len() - 1;
             forest_bool[y as usize][x as usize] = forest_bool[y as usize][x as usize] ||
@@ -86,13 +87,11 @@ fn part1(forest: Vec<Vec<u32>>) -> u32
     let mut forest_bool: Vec<Vec<bool>> = vec![vec![false; forest[0].len()]; forest.len()];
     let xlen: i32 = forest_bool.len() as i32;
     let ylen: i32 = forest_bool[0].len() as i32;
-    //println!("[1][0] = {}, [0][1] = {}", forest[1][0], forest[0][1]);
     forest_bool = left_right_parc(&forest, forest_bool, 0, xlen, 0, ylen);
     forest_bool = left_right_parc(&forest, forest_bool, xlen - 1, -1, ylen - 1, -1);
     forest_bool = top_bottom_parc(&forest, forest_bool, 0, xlen, 0, ylen);
     forest_bool = top_bottom_parc(&forest, forest_bool, xlen - 1, -1, ylen - 1, -1);
-    print_debug(forest_bool);
-    return 0;
+    return sum_visible(forest_bool);
 }
 
 fn main() {
@@ -101,6 +100,6 @@ fn main() {
 
     let trees = parc_forest(&input_str.lines().collect::<Vec<_>>());
     
-    part1(trees);
-    //println!("Part1 solution is : {}", part1(&trees));
+    //part1(trees);
+    println!("Part1 solution is : {}", part1(trees));
 }
