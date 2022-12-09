@@ -23,9 +23,7 @@ fn sum_visible(forest: Vec<Vec<bool>>) -> i32
         for n in c
         {
             if n {sum += 1;}
-            print!("{} ", n);
         }
-        println!();
     }
     return sum;
 }
@@ -41,7 +39,6 @@ fn left_right_parc(forest: &Vec<Vec<i32>>, mut forest_bool: Vec<Vec<bool>>, begi
         while if begin2 < end2 {x < end2} else {x > end2}
         {
             if max == 9 {break;}
-            println!("x = {}", x);
             if forest_bool[y as usize][x as usize] {
                 max = if forest[y as usize][x as usize] > max {forest[y as usize][x as usize]} else {max};
                 x = if begin2 < end2 {x + 1} else {x - 1}; 
@@ -69,7 +66,6 @@ fn top_bottom_parc(forest: &Vec<Vec<i32>>, mut forest_bool: Vec<Vec<bool>>, begi
         let mut y = begin2;
         while if begin2 < end2 {y < end2} else {y > end2}
         {
-            println!("x = {}, y = {}, max = {}", x, y, max);
             if max == 9 {break;}
             if forest_bool[y as usize][x as usize] {
                 max = if forest[y as usize][x as usize] > max {forest[y as usize][x as usize]} else {max};
@@ -88,7 +84,7 @@ fn top_bottom_parc(forest: &Vec<Vec<i32>>, mut forest_bool: Vec<Vec<bool>>, begi
     return forest_bool;
 }
 
-fn part1(forest: Vec<Vec<i32>>) -> i32
+fn part1(forest: &Vec<Vec<i32>>) -> i32
 {
     let mut forest_bool: Vec<Vec<bool>> = vec![vec![false; forest[0].len()]; forest.len()];
     let xlen: i32 = forest_bool[0].len() as i32;
@@ -100,13 +96,61 @@ fn part1(forest: Vec<Vec<i32>>) -> i32
     return sum_visible(forest_bool);
 }
 
+fn compute_height(forest: &Vec<Vec<i32>>, x: usize, y:usize) -> i32
+{
+    let height = forest[y][x];
+    let (mut top, mut bot, mut left, mut right) = (0, 0, 0, 0);
+
+    for ybis in (0..y).rev() {
+        top += 1;
+        if forest[ybis][x] >= height { break; }
+    }
+
+    for ybis in (y+1..forest.len()) {
+        bot += 1;
+        if forest[ybis][x] >= height {break;}
+    }
+
+    for xbis in (0..x).rev() {
+        left += 1;
+        if forest[y][xbis] >= height {break;}
+    }
+
+    for xbis in (x+1..forest[y].len()) {
+        right += 1;
+        if forest[y][xbis] >= height {break;}
+    }
+
+    let res = top * right * bot * left;
+    if res == 8 {
+        println!("x={}, y= {}, val= {}, top= {}, bot= {}, left= {}, right= {}", x, y, forest[y][x], top, bot, left, right);
+    }
+    return res;
+}
+
+fn part2(forest: &Vec<Vec<i32>>) -> i32
+{
+    let xlen = forest[0].len();
+    let mut max = 0;
+    for y in 0..forest.len()
+    {
+        for x in 0..xlen
+        {
+            let height = compute_height(forest, x, y);
+            max = if height > max {height} else {max};
+        }
+    }
+    return max;
+}
+
 fn main() {
-    let input_str = include_str!("input_test2.txt");
+    let input_str = include_str!("input_test.txt");
     let input_str = include_str!("input.txt");
     //println!("input is : {}", input_str);
 
     let trees = parc_forest(&input_str.lines().collect::<Vec<_>>());
     
     //part1(trees);
-    println!("Part1 solution is : {}", part1(trees));
+    println!("Part1 solution is : {}", part1(&trees));
+    println!("Part2 solution is : {}", part2(&trees));
 }
